@@ -26,7 +26,8 @@ def myImputer(data, value="zero", verbose=0):
     data: numpy array, matrix
     value:    string: "mean", "min", "max", "zero", "gaussian"
     """
-    index = np.isnan(data)
+    index = pd.isnull(data)
+    
     data_imputed = np.copy(data)
     data_drop = data[np.logical_not(index)]   #drop nan from data
     inputed_value = 0
@@ -44,6 +45,7 @@ def myImputer(data, value="zero", verbose=0):
         inputed_value = popular_value(data_drop)
     # special type of imputed, just return after imputation
     elif (value == "knn"):
+        from fancyimpute import KNN
         data_clean = KNN(k=5).complete(data)
         return data_clean
     else:
@@ -51,11 +53,11 @@ def myImputer(data, value="zero", verbose=0):
 
     data_imputed[index] = inputed_value
 
-    if verbose: print "imputed missing value: {}".format(inputed_value)
+    if verbose: print("imputed missing value: {}".format(inputed_value))
     return data_imputed
 
 
-def imputeData(data, missing_col_id, imputation_strategies, verbose):
+def imputeData(data, missing_col_id, imputation_strategies,verbose=0):
     """
     impute the data using permutations array.
     INPUT:
@@ -70,11 +72,12 @@ def imputeData(data, missing_col_id, imputation_strategies, verbose):
 
         data_clean[:,col_id] = myImputer(data[:,col_id], strategy)
 
+
     return data_clean
 
-def bayeImpute(data, target_col):
+def bayeImpute(data, target_col, verbose=0):
     '''
-    currently, naive bayes.
+    currently, BayesianRidge.
     return the imputated data, and model coefficient
     '''
 
@@ -88,8 +91,8 @@ def bayeImpute(data, target_col):
 
     target = data[:, target_col]
     data = np.delete(data, obj=target_col, axis=1)  #remove the missing-value column
-    mv_mask = np.isnan(target)
-    print "number of imputated cells: {}".format(sum(np.isnan(original_data[:,target_col])))
+    mv_mask = pd.isnull(target)
+    if verbose: print("number of imputated cells: {}".format(sum(pd.isnull(original_data[:,target_col]))))
 
     x_test = data[mv_mask]
     x_train = data[~mv_mask]
@@ -106,5 +109,30 @@ def bayeImpute(data, target_col):
     result = model.predict(x_test)
     original_data[mv_mask, target_col] = result #put the imputation result back to original data, following the index
 
-    # print "coefficient: {}".format(model.coef_)
-    return original_data, model      
+    # print("coefficient: {}".format(model.coef_))
+    return original_data, model
+
+
+
+def transform(data, target_col, model, verbose=0):
+    '''
+    currently, BayesianRidge.
+    return the imputated data, and model coefficient
+    '''
+
+    original_data = np.copy(data)
+
+    target = data[:, target_col]
+    data = np.delete(data, obj=target_col, axis=1)  #remove the missing-value column
+    mv_mask = pd.isnull(target)
+    if verbose: print("number of imputated cells: {}".format(sum(pd.isnull(original_data[:,target_col]))))
+
+    x_test = data[mv_mask]
+    x_train = data[~mv_mask]
+    y_train = target[~mv_mask]
+
+    result = model.predict(x_test)
+    original_data[mv_mask, target_col] = result #put the imputation result back to original data, following the index
+
+    # print("coefficient: {}".format(model.coef_))
+    return original_data
