@@ -41,7 +41,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params]):
 
     """
 
-    def __init__(self, verbose=0) -> None:
+    def __init__(self, verbose=0):
         self.best_imputation = None
         self.imputation_strategies = ["mean", "max", "min", "zero"]
         self.train_x = None
@@ -51,23 +51,23 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params]):
         self.verbose = 0
 
 
-    def set_params(self, *, params: Params) -> None:
+    def set_params(self, params):
         self.is_fitted = len(params.greedy_strategy) > 0
         self._has_finished = self.is_fitted
         self.best_imputation = params.greedy_strategy
 
-    def get_params(self) -> Params:
+    def get_params(self):
         if self.is_fitted:
             return Params(greedy_strategy=self.best_imputation)
         else:
             return Params(greedy_strategy=dict())
 
 
-    def get_call_metadata(self) -> CallMetadata:
-            return CallMetadata(has_finished=self._has_finished, iterations_done=self._iterations_done)
+    def get_call_metadata(self):
+        return CallMetadata(has_finished=self._has_finished, iterations_done=self._iterations_done)
 
 
-    def set_training_data(self, *, inputs: Sequence[Input], outputs: Sequence[Output]) -> None:
+    def set_training_data(self, inputs, outputs):
         """
         Sets training data of this primitive.
 
@@ -84,7 +84,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params]):
 
 
 
-    def fit(self, *, timeout: float = None, iterations: int = None) -> None:
+    def fit(self, timeout=None, iterations=None):
         """
         train imputation parameters. Now support:
         -> greedySearch
@@ -137,7 +137,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params]):
             return
 
 
-    def produce(self, *, inputs: Sequence[Input], timeout: float = None, iterations: int = None) -> Sequence[Output]:
+    def produce(self, inputs, timeout=None, iterations=None):
         """
         precond: run fit() before
 

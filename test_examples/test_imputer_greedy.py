@@ -27,6 +27,12 @@ imputer = GreedyImputation(verbose=1)
 imputer.set_training_data(inputs=data, outputs=label)	# unsupervised
 imputer.fit(timeout=10)	# give 10 seconds to fit
 print (imputer.get_call_metadata())	# to see wether fit worked
-result = imputer.produce(inputs=data, timeout=0.01)
+
+# check if get/set_params work
+imputer2 = GreedyImputation(verbose=0)
+imputer2.set_params(params=imputer.get_params())
+
+result = imputer2.produce(inputs=data, timeout=100.0)
+
 print (imputer.get_call_metadata())	# to see wether produce worked
 

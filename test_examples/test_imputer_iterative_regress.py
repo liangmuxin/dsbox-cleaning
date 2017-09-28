@@ -29,7 +29,10 @@ imputer.fit(timeout=10)	# give 10 seconds to fit
 print (imputer.get_call_metadata())	# to see wether fit worked
 print ("\nParams:")
 print (imputer.get_params())
+# check if get/set_params work
+imputer2 = IterativeRegressionImputation(verbose=1)
+imputer2.set_params(params=imputer.get_params())
 
-result = imputer.produce(inputs=data, timeout=0.5)
+result = imputer2.produce(inputs=data, timeout=0.5)
 print (imputer.get_call_metadata())	# to see wether produce worked
 

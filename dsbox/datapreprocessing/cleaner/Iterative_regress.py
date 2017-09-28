@@ -42,7 +42,7 @@ class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Outp
     
     """
 
-    def __init__(self, verbose=0) -> None:
+    def __init__(self, verbose=0):
         self.best_imputation = None
         self.train_x = None
         self.is_fitted = False
@@ -50,23 +50,23 @@ class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Outp
         self.verbose = verbose
 
 
-    def set_params(self, *, params: Params) -> None:
+    def set_params(self, params):
         self.is_fitted = len(params.regression_models) > 0
         self._has_finished = self.is_fitted
         self.best_imputation = params.regression_models
 
-    def get_params(self) -> Params:
+    def get_params(self):
         if self.is_fitted:
             return Params(regression_models=self.best_imputation)
         else:
             return Params(regression_models=dict())
 
 
-    def get_call_metadata(self) -> CallMetadata:
-            return CallMetadata(has_finished=self._has_finished, iterations_done=self._iterations_done)
+    def get_call_metadata(self):
+        return CallMetadata(has_finished=self._has_finished, iterations_done=self._iterations_done)
 
 
-    def set_training_data(self, *, inputs: Sequence[Input]) -> None:
+    def set_training_data(self, inputs):
         """
         Sets training data of this primitive.
 
@@ -79,7 +79,7 @@ class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Outp
         self.is_fitted = False
 
 
-    def fit(self, *, timeout: float = None, iterations: int = None) -> None:
+    def fit(self, timeout=None, iterations=None):
         """
         train imputation parameters. Now support:
         -> greedySearch
@@ -121,7 +121,7 @@ class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Outp
             return
 
 
-    def produce(self, *, inputs: Sequence[Input], timeout: float = None, iterations: int = None) -> Sequence[Output]:
+    def produce(self, inputs, timeout=None, iterations=None):
         """
         precond: run fit() before
 

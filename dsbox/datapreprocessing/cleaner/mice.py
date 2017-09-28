@@ -24,7 +24,7 @@ class MICE(TransformerPrimitiveBase[Input, Output]):
         Control the verbosity
     """
 
-    def __init__(self, verbose=0) -> None:
+    def __init__(self, verbose=0):
         self.train_x = None
         self.is_fitted = True
         self._has_finished = True
@@ -32,12 +32,12 @@ class MICE(TransformerPrimitiveBase[Input, Output]):
         self.verbose = verbose
 
 
-    def get_call_metadata(self) -> CallMetadata:
-            return CallMetadata(has_finished=self._has_finished, iterations_done=self._iterations_done)
+    def get_call_metadata(self):
+        return CallMetadata(has_finished=self._has_finished, iterations_done=self._iterations_done)
 
 
 
-    def produce(self, *, inputs: Sequence[Input], timeout: float = None, iterations: int = None) -> Sequence[Output]:
+    def produce(self, inputs, timeout=None, iterations=None):
         """
         precond: run fit() before
 
