@@ -99,7 +99,7 @@ class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Outp
             return True
 
         if (timeout is None):
-            timeout = math.inf
+            timeout = float("inf")
         if (iterations is None):
             self._iterations_done = True
             iterations = 30
@@ -148,7 +148,7 @@ class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Outp
             raise ValueError("Calling produce before fitting.")
 
         if (timeout is None):
-            timeout = math.inf
+            timeout = float("inf")
         if (iterations is None):
             self._iterations_done = True
             iterations = 30 # only works for iteratively_regre method

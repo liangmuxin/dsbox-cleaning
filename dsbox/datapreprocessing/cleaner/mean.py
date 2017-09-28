@@ -57,7 +57,7 @@ class MeanImputation(TransformerPrimitiveBase[Input, Output]):
             raise ValueError("Calling produce before fitting.")
 
         if (timeout is None):
-            timeout = math.inf
+            timeout = float("inf")
         if (iterations is None):
             iterations = 100   # default value for mice
 

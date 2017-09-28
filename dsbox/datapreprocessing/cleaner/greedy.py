@@ -103,7 +103,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params]):
             return True
 
         if (timeout is None):
-            timeout = math.inf
+            timeout = float("inf")
 
         # setup the timeout
         with stopit.ThreadingTimeout(timeout) as to_ctx_mrg:
@@ -164,7 +164,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params]):
             raise ValueError("Calling produce before fitting.")
 
         if (timeout is None):
-            timeout = math.inf
+            timeout = float("inf")
 
         if isinstance(inputs, pd.DataFrame):
             data = inputs.copy()

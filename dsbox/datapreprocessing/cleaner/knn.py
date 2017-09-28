@@ -67,7 +67,7 @@ class KNNImputation(TransformerPrimitiveBase[Input, Output]):
             raise ValueError("Calling produce before fitting.")
 
         if (timeout is None):
-            timeout = math.inf
+            timeout = float("inf")
 
         if isinstance(inputs, pd.DataFrame):
             data = inputs.copy()
