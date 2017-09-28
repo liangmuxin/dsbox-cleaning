@@ -47,7 +47,7 @@ class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, Params]):
         return "%s(%r)" % ('Encoder', self.__dict__)
 
 
-    def __init__(self, *, categorical_features='95in10', text2int=True, n_limit=10) -> None:
+    def __init__(self, categorical_features='95in10', text2int=True, n_limit=10):
 
         self.categorical_features = categorical_features
         self.n_limit = n_limit
@@ -98,23 +98,23 @@ class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, Params]):
             return
 
 
-    def get_params(self) -> Params:
+    def get_params(self):
         return Params(mapping=self.mapping, all_columns=self.all_columns, empty_columns=self.empty_columns)
 
 
-    def set_params(self, *, params: Params) -> None:
+    def set_params(self, params):
         self.fitted = True
         self.mapping = params.mapping
         self.all_columns = params.all_columns
         self.empty_columns = params.empty_columns
 
 
-    def set_training_data(self, *, inputs: Sequence[Input]):
+    def set_training_data(self, inputs):
         self.training_inputs = inputs
         self.fitted = False
 
 
-    def fit(self, *, timeout:float = None, iterations: int = None) -> None:
+    def fit(self, timeout = None, iterations = None):
         """
         Need training data from set_training_data first.
         The encoder would record categorical columns identified and
@@ -142,7 +142,7 @@ class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, Params]):
         self.fitted = True
 
 
-    def produce(self, *, inputs: Sequence[Input], timeout:float = None, iterations: int = None):
+    def produce(self, inputs, timeout = None, iterations = None):
         """
         Convert and output the input data into encoded format,
         using the trained (fitted) encoder.
