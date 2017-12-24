@@ -6,6 +6,7 @@ from primitive_interfaces.unsupervised_learning import UnsupervisedLearnerPrimit
 from typing import NamedTuple, Dict, List, Set
 from d3m_metadata.container.pandas import DataFrame
 from d3m_metadata.hyperparams import Enumeration, UniformInt, Hyperparams
+from d3m_metadata import params
 
 def isCat_95in10(col):
     """
@@ -16,12 +17,18 @@ def isCat_95in10(col):
 Input = DataFrame
 Output = DataFrame
 
-Params = NamedTuple('Params', [
-    ('mapping', Dict),
-    ('all_columns', Set[str]),
-    ('empty_columns', List[str]),
-    ('textmapping', Dict)
-    ])
+class EncParams(params.Params):
+	mapping : Dict,
+	all_columns: Set[str],
+	empty_columns: List[str],
+	textmapping: Dict
+
+#Params = NamedTuple('Params', [
+#    ('mapping', Dict),
+#    ('all_columns', Set[str]),
+#    ('empty_columns', List[str]),
+#    ('textmapping', Dict)
+#    ])
 
 
 class EncHyperparameter(Hyperparams):
@@ -81,9 +88,9 @@ class Label_encoder(object):
             return self.class_index[f][x]
 
 
-class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, EncHyperparameter]):
+class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, EncParams, EncHyperparameter]):
     __author__ = "USC ISI"
-    __metadata__ = {
+    __metadata__ = PrimitiveMetadata({
             "id": "18f0bb42-6350-3753-8f2d-d1c3da70f279",
             "name": "dsbox.datapreprocessing.cleaner.Encoder",
             "common_name": "DSBox Data Encoder",
@@ -127,7 +134,7 @@ class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, EncHyperpa
             "interfaces": [ "UnsupervisedLearnerPrimitiveBase" ],
             "interfaces_version": "2017.9.22rc0",
 
-            }
+            })
 
     """
     An one-hot encoder, which
