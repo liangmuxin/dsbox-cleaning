@@ -35,7 +35,8 @@ class EncHyperparameter(Hyperparams):
     text2int = Enumeration(values=[True,False],default=False,
             description='Whether to convert everything to numerical')
     n_limit = UniformInt(lower=5, upper=100, default=12,description='Maximum columns to encode')
-
+    categorical_features = Enumeration(values=['95in10'],default='95in10',
+            description='rule to declare categorical')
 
 ## reference: https://github.com/scikit-learn/scikit-learn/issues/8136
 class Label_encoder(object):
@@ -155,9 +156,10 @@ class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, EncParams, EncHype
         return "%s(%r)" % ('Encoder', self.__dict__)
 
 
-    def __init__(self, hyperparam: EncHyperparameter, categorical_features='95in10') -> None:
+    def __init__(self,*, hyperparam: EncHyperparameter, random_seed: int = 0, 
+                 docker_containers: typing.Union[typing.Dict[str, str], None] = None) -> None:
 
-        self.categorical_features = categorical_features
+        self.categorical_features = hyperparam['categorical_features']
         self.n_limit = hyperparam['n_limit']
         self.text2int = hyperparam['text2int']
         #
