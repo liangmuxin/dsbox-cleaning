@@ -16,14 +16,14 @@ Input = d3m_metadata.container.DataFrame
 Output = d3m_metadata.container.DataFrame
 
 # store the mean value for each column in training data
-class Params(params.Params):
-    mean_values: dict
+class MeanParams(params.Params):
+    mean_values: typing.Union[dict, None]
     
-class Hyperparams(hyperparams.Hyperparams):
-    verbose: UniformInt(lower=0, upper=1, default=0)
+class MeanHyperparams(hyperparams.Hyperparams):
+    verbose = UniformInt(lower=0, upper=1, default=0)
     
 
-class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Hyperparams]):
+class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, MeanParams, MeanHyperparams]):
     """
     Impute missing values using the `mean` value of the attribute.
     """    
@@ -62,7 +62,7 @@ class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Hyp
         "hyperparms_to_tune": []
         })
 
-    def __init__(self, *, hyperparams: Hyperparams, random_seed: int = 0, 
+    def __init__(self, *, hyperparams: MeanHyperparams, random_seed: int = 0, 
                  docker_containers: typing.Union[typing.Dict[str, str], None] = None) -> None:
         # All primitives must define these attributes
         self.hyperparams = hyperparams
@@ -77,17 +77,18 @@ class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Hyp
         self._verbose = hyperparams['verbose'] if hyperparams else 0
         
 
-    def set_params(self, *, params: Params) -> None:
-        self._is_fitted = len(params.mean_values) > 0
+    def set_params(self, *, params: MeanParams) -> None:
+        self._is_fitted = len(params['mean_values']) > 0
         self._has_finished = self._is_fitted
         self._iterations_done = self._is_fitted
-        self.mean_values = params.mean_values
+        self.mean_values = params['mean_values']
 
-    def get_params(self) -> Params:
+    def get_params(self) -> MeanParams:
         if self._is_fitted:
-            return Params(mean_values=self.mean_values)
+            #print('PASSING MEAN VALUES: ', type(self.mean_values))
+            return MeanParams(mean_values=self.mean_values)
         else:
-            return Params(mean_values=dict())
+            return MeanParams(mean_values=dict())
 
     def set_training_data(self, *, inputs: Input) -> None:
         """
@@ -194,5 +195,4 @@ class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Hyp
 
     def __get_fitted(self):
         self.mean_values = self._train_x.mean(axis=0).to_dict()
-
-
+        #print('MEAN VALUES: ', type(self.mean_values))
