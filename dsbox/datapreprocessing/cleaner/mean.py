@@ -4,6 +4,7 @@ from primitive_interfaces.unsupervised_learning import UnsupervisedLearnerPrimit
 
 from primitive_interfaces.base import CallResult
 import stopit #  type: ignore
+import typing # added import
 
 import d3m_metadata.container
 from d3m_metadata.metadata import PrimitiveMetadata
