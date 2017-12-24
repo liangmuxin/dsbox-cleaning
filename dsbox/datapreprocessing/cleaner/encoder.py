@@ -18,9 +18,9 @@ Input = DataFrame
 Output = DataFrame
 
 class EncParams(params.Params):
-	mapping : Dict,
-	all_columns: Set[str],
-	empty_columns: List[str],
+	mapping : Dict
+	all_columns: Set[str]
+	empty_columns: List[str]
 	textmapping: Dict
 
 #Params = NamedTuple('Params', [
