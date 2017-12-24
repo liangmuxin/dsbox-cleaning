@@ -159,18 +159,20 @@ class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, EncParams, EncHype
     def __init__(self,*, hyperparam: EncHyperparameter, random_seed: int = 0, 
                  docker_containers: typing.Union[typing.Dict[str, str], None] = None) -> None:
 
-        self.categorical_features = hyperparam['categorical_features']
-        self.n_limit = hyperparam['n_limit']
-        self.text2int = hyperparam['text2int']
+	super().__init__(hyperparams = hyperparams, random_seed = random_seed, docker_containers = docker_containers)
+      
+        #self.categorical_features = hyperparam['categorical_features']
+        #self.n_limit = hyperparam['n_limit']
+        #self.text2int = hyperparam['text2int']
         #
-        self.textmapping : Dict = None
+        #self.textmapping : Dict = None
         #
-        self.mapping : Dict = None
-        self.all_columns : Set[str] = set()
-        self.empty_columns : List[str] = []
+        #self.mapping : Dict = None
+        #self.all_columns : Set[str] = set()
+        #self.empty_columns : List[str] = []
 
-        self.training_inputs : Input = None
-        self.fitted = False
+        #self.training_inputs : Input = None
+        #self.fitted = False
 
 
     def __column_features(self, col, n_limit):
@@ -243,11 +245,11 @@ class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, EncParams, EncHype
 
         self.all_columns = set(data_copy.columns)
 
-        if self.categorical_features == '95in10':
+        if self.hyperparams['categorical_features'] == '95in10':
             idict = {}
             for column_name in data_copy:
                 col = data_copy[column_name]
-                p = self.__process(col, self.categorical_features, self.n_limit)
+                p = self.__process(col, self.hyperparams['categorical_features'], self.hyperparams['n_limit'])
                 if p:
                     idict[p[0]] = p[1]
             self.mapping = idict
@@ -262,7 +264,7 @@ class Encoder(UnsupervisedLearnerPrimitiveBase[Input, Output, EncParams, EncHype
         self.fitted = True
 
 
-    def produce(self, *, inputs: Input, timeout:float = None, iterations: int = None):
+    def produce(self, *, inputs: Input, timeout:float = None, iterations: int = None) -> CallResult[Output]:
         """
         Convert and output the input data into encoded format,
         using the trained (fitted) encoder.
