@@ -1,5 +1,5 @@
 from .encoder import Encoder, EncHyperparameter
-from .unary_encoder import UnaryEncoder, UEncHyperparameter
+# from .unary_encoder import UnaryEncoder, UEncHyperparameter
 
 from .mean import MeanImputation, MeanHyperparameter
 from .Iterative_regress import IterativeRegressionImputation, IterativeRegressionHyperparameter
@@ -13,7 +13,7 @@ from .knn import KNNImputation, KnnHyperparameter
 #                         'UEncHyperparameter','EncHyperparameter']
 
 __all__ = ['Encoder', 'EncHyperparameter',
-            'UEncHyperparameter', 'UEncHyperparameter'
+#            'UEncHyperparameter', 'UEncHyperparameter'
             'KNNImputation',  'KnnHyperparameter',
             'MeanImputation', 'MeanHyperparameter'
             'MICE', 'MiceHyperparameter',
