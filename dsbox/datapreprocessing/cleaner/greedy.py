@@ -98,15 +98,19 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
 
 
     def set_params(self, *, params: Params) -> None:
-        self._is_fitted = len(params['greedy_strategy']) > 0
+        temp = params['greedy_strategy']
+        if (("dummy" in temp) and temp["dummy"] == 0 ):
+            temp.pop("dummy")
+
+        self._is_fitted = True
         self._has_finished = self._is_fitted
-        self._best_imputation = params['greedy_strategy']
+        self._best_imputation = temp
 
     def get_params(self) -> Params:
-        if self._is_fitted:
+        if (self._is_fitted and len(self._best_imputation) > 0):
             return Params(greedy_strategy=self._best_imputation)
         else:
-            return Params(greedy_strategy=dict())
+            return Params(greedy_strategy={"dummy":0}) # set a dummy value to pass
 
 
     def set_training_data(self, *, inputs: Input, outputs: Output) -> None:
@@ -123,7 +127,6 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
         self._train_x = inputs
         self._train_y = outputs
         self._is_fitted = False
-
 
 
     def fit(self, *, timeout: float = None, iterations: int = None) -> CallResult[None]:
@@ -200,7 +203,6 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
         1. add evaluation part for __simpleImpute()
 
         """
-
         if (not self._is_fitted):
             # todo: specify a NotFittedError, like in sklearn
             raise ValueError("Calling produce before fitting.")
@@ -338,7 +340,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
         strategies_dict: dict. maps: col_name -> imputation_method
             imputation strategies combination
         """
-
+        
         col_names = data.keys()
         # 1. convert to np array and get missing value column id
         missing_col_id = []

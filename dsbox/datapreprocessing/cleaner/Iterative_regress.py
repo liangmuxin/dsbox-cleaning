@@ -91,15 +91,19 @@ class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Outp
 
 
     def set_params(self, *, params: Params) -> None:
-        self._is_fitted = len(params['regression_models']) > 0
+        temp = params['regression_models']
+        if (("dummy" in temp) and temp["dummy"] == 0 ):
+            temp.pop("dummy")
+
+        self._is_fitted = True
         self._has_finished = self._is_fitted
-        self._best_imputation = params['regression_models']
+        self._best_imputation = temp
 
     def get_params(self) -> Params:
-        if self._is_fitted:
+        if (self._is_fitted and len(self._best_imputation) > 0):
             return Params(regression_models=self._best_imputation)
         else:
-            return Params(regression_models=dict())
+            return Params(regression_models={"dummy":0}) # set a dummy value to pass
 
 
     def set_training_data(self, *, inputs: Input) -> None:
@@ -301,7 +305,7 @@ class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Outp
             if (name not in model_dict.keys()):
                 data = mvp.imputeData(data, [missing_col_id[i]], ["mean"], self._verbose)
                 # mask[missing_col_id[i]] = False
-                print ("fill" + name + "with mean")
+                if (self._verbose): print ("fill" + name + "with mean")
                 # offset += 1
             else:
                 model_list.append(model_dict[name])
