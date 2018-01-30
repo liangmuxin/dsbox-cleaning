@@ -25,7 +25,8 @@ class Params(params.Params):
     regression_models: typing.Dict
 
 class IterativeRegressionHyperparameter(hyperparams.Hyperparams):
-    verbose = UniformInt(lower=0, upper=1, default=0)
+    # Either 0 or 1
+    verbose = UniformInt(lower=0, upper=2, default=0)
 
 
 class IterativeRegressionImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, IterativeRegressionHyperparameter]):

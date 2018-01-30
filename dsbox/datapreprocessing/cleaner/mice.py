@@ -21,7 +21,8 @@ Input = d3m_metadata.container.DataFrame
 Output = d3m_metadata.container.DataFrame
 
 class MiceHyperparameter(Hyperparams):
-    verbose = UniformInt(lower=0, upper=1, default=0)
+    # Either 0 or 1
+    verbose = UniformInt(lower=0, upper=2, default=0)
 
 class MICE(TransformerPrimitiveBase[Input, Output, MiceHyperparameter]):
     """

@@ -25,7 +25,8 @@ class Params(params.Params):
     greedy_strategy: typing.Dict
 
 class GreedyHyperparameter(hyperparams.Hyperparams):
-    verbose = UniformInt(lower=0, upper=1, default=0)
+    # Either 0 or 1
+    verbose = UniformInt(lower=0, upper=2, default=0)
 
 
 class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, GreedyHyperparameter]):

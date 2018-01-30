@@ -24,7 +24,8 @@ class Params(params.Params):
     mean_values : typing.Dict
     
 class MeanHyperparameter(hyperparams.Hyperparams):
-    verbose = UniformInt(lower=0, upper=1, default=0)
+    # Either 0 or 1
+    verbose = UniformInt(lower=0, upper=2, default=0)
     
 
 class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, MeanHyperparameter]):

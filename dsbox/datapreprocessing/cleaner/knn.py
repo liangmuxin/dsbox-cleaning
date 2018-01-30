@@ -24,7 +24,8 @@ class KnnHyperparameter(Hyperparams):
     # A reasonable upper bound would the size of the input. For now using 100.
     k = UniformInt(lower=1, upper=100, default=5,
                      description='Number of neighbors')
-    verbose = UniformInt(lower=0, upper=1, default=0)
+    # Either 0 or 1
+    verbose = UniformInt(lower=0, upper=2, default=0)
     
 class KNNImputation(TransformerPrimitiveBase[Input, Output, KnnHyperparameter]):
     """
