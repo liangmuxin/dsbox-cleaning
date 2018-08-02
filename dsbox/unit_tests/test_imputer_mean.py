@@ -16,6 +16,7 @@ import os
 from d3m.container.dataset import D3MDatasetLoader, Dataset, CSVLoader
 
 from dsbox.datapreprocessing.cleaner import MeanImputation, MeanHyperparameter
+from dsbox.datapreprocessing.cleaner.dependencies.helper_funcs import HelperFunction
 
 from dsbox.datapreprocessing.cleaner.denormalize import Denormalize, DenormalizeHyperparams as hyper_DE
 from common_primitives.dataset_to_dataframe import DatasetToDataFramePrimitive, Hyperparams as hyper_DD
@@ -164,7 +165,8 @@ class TestMean(unittest.TestCase):
         nan_sum = 0
         for col_name in result:
             for i in result[col_name].index:
-                if result[col_name][i] == "" or pd.isnull(data[col_name][i]):
+                this_dtype = result.dtypes[col_name]
+                if HelperFunction.custom_is_null(result[col_name][i], this_dtype):
                     nan_sum += 1
 
         self.assertEqual(nan_sum, 0)
@@ -178,7 +180,8 @@ class TestMean(unittest.TestCase):
         for col_name in data:
             for i in data[col_name].index:
                 if data[col_name][i]:
-                    if isinstance(data[col_name][i], int) or isinstance(data[col_name][i], float) or data[col_name][i].isnumeric():
+                    if isinstance(data[col_name][i], int) or isinstance(data[col_name][i], float) or data[col_name][
+                        i].isnumeric():
                         self.assertEqual(float(data[col_name][i]) == float(result[col_name][i]), True,
                                          msg="not equals in column: {}".format(col_name))
                     else:

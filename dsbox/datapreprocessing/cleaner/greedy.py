@@ -13,10 +13,13 @@ from d3m.metadata import hyperparams, params
 from d3m.metadata.hyperparams import UniformBool
 import common_primitives.utils as utils
 
+from dsbox.datapreprocessing.cleaner.dependencies.helper_funcs import HelperFunction
+
 from . import config
 
 Input = container.DataFrame
 Output = container.DataFrame
+
 
 # store the best imputation strategy for each missing-value column in training data
 
@@ -141,7 +144,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
             return CallResult(None, self._has_finished, self._iterations_done)
 
         if (timeout is None):
-            timeout = 2**31 - 1
+            timeout = 2 ** 31 - 1
 
         # setup the timeout
         with stopit.ThreadingTimeout(timeout) as to_ctx_mrg:
@@ -201,7 +204,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
             raise ValueError("Calling produce before fitting.")
 
         if (timeout is None):
-            timeout = 2**31 - 1
+            timeout = 2 ** 31 - 1
 
         data = inputs.copy()
 
@@ -233,7 +236,7 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
             self._iterations_done = False
         return CallResult(value, self._has_finished, self._iterations_done)
 
-    #============================================ fit phase functinos ============================================
+    # ============================================ fit phase functinos ============================================
     def _set_model_scorer(self, model=None, scorer=None):
         """
         figure out what model and scorer should be used for given dataset (label)
@@ -255,7 +258,8 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
             self.scorer = make_scorer(f1_score, average="macro")
         else:
             self.model = SVR()
-            self.scorer = make_scorer(r2_score, greater_is_better=False)  # score will be * -1, if greater_is_better is set to False
+            self.scorer = make_scorer(r2_score,
+                                      greater_is_better=False)  # score will be * -1, if greater_is_better is set to False
 
     def __imputationGreedySearch(self, data, label):
         """
@@ -280,7 +284,8 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
         label = label.values
 
         # init for the permutation
-        permutations = [0] * len(missing_col_id)   # length equal with the missing_col_id; value represents the id for imputation_strategies
+        permutations = [0] * len(
+            missing_col_id)  # length equal with the missing_col_id; value represents the id for imputation_strategies
         pos = len(permutations) - 1
         min_score = float("inf")
         max_score = -float("inf")
@@ -315,21 +320,22 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
             print("max score is {}, min score is {}\n".format(max_score, min_score))
             print("and the best score is given by the imputation combination: ")
 
-        best_imputation = {}    # key: col_name; value: imputation strategy
+        best_imputation = {}  # key: col_name; value: imputation strategy
         for i in range(len(best_combo)):
             best_imputation[col_names[missing_col_id[i]]] = self._imputation_strategies[best_combo[i]]
             if self._verbose:
-                print(self._imputation_strategies[best_combo[i]] + " for the column {}".format(col_names[missing_col_id[i]]))
+                print(self._imputation_strategies[best_combo[i]] + " for the column {}".format(
+                    col_names[missing_col_id[i]]))
 
         return best_imputation
 
-    #============================================ helper  functions ============================================
+    # ============================================ helper  functions ============================================
     def __isCat_95in10(self, label):
         """
         copied from dsbox.datapreprocessing.cleaner.encoder:
         hardcoded rule for identifying (integer/string) categorical column
         """
-        col = label[label.keys()[0]]    # assume only one label
+        col = label[label.keys()[0]]  # assume only one label
         return col.value_counts().head(10).sum() / float(col.count()) > .95
 
     def __simpleImpute(self, data, strategies_dict, verbose=False):
@@ -373,7 +379,8 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
         """
         from sklearn.model_selection import train_test_split  # type: ignore
         try:
-            X_train, X_test, y_train, y_test = train_test_split(data_clean, label, test_size=0.4, random_state=0, stratify=label)
+            X_train, X_test, y_train, y_test = train_test_split(data_clean, label, test_size=0.4, random_state=0,
+                                                                stratify=label)
         except:
             if self._verbose:
                 print("cannot stratified sample, try random sample: ")
@@ -381,8 +388,9 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
 
         # remove the nan rows
 
-        mask_train = np.isnan(X_train).any(axis=1)  # nan rows index
-        mask_test = np.isnan(X_test).any(axis=1)
+        f = np.vectorize(HelperFunction.custom_is_null)
+        mask_train = f(X_train).any(axis=1)  # nan rows index
+        mask_test = f(X_test).any(axis=1)
         num_removed_test = sum(mask_test)
         X_train = X_train[~mask_train]
         y_train = y_train[~mask_train]
@@ -390,12 +398,14 @@ class GreedyImputation(SupervisedLearnerPrimitiveBase[Input, Output, Params, Gre
         y_test = y_test[~mask_test]
 
         model = self.model.fit(X_train, y_train.ravel())
-        score = self.scorer(model, X_test, y_test)  # refer to sklearn scorer: score will be * -1 with the real score value
+        score = self.scorer(model, X_test,
+                            y_test)  # refer to sklearn scorer: score will be * -1 with the real score value
         if self._verbose:
             print("score is: {}".format(score))
 
         if self._verbose:
             print("===========>> max score is: {}".format(score))
         if (num_removed_test > 0):
-            print("BUT !!!!!!!!there are {} data (total test size: {})that cannot be predicted!!!!!!\n".format(num_removed_test, mask_test.shape[0]))
+            print("BUT !!!!!!!!there are {} data (total test size: {})that cannot be predicted!!!!!!\n".format(
+                num_removed_test, mask_test.shape[0]))
         return score

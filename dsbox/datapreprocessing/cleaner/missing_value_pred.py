@@ -1,5 +1,6 @@
 import pandas as pd  # type: ignore
 import numpy as np  # type: ignore
+from dsbox.datapreprocessing.cleaner.dependencies.helper_funcs import HelperFunction
 
 def popular_value(array):
     """
@@ -20,18 +21,21 @@ def popular_value(array):
 
     return popular
 
+
 def myImputer(data, value="zero", verbose=False):
     """
     INPUT:
     data: numpy array, matrix
     value:    string: "mean", "min", "max", "zero", "gaussian"
     """
-    index = pd.isnull(data)
+    f = np.vectorize(HelperFunction.custom_is_null)
+    index = f(data)
 
     data_imputed = np.copy(data)
-    data_drop = data[np.logical_not(index)]   #drop nan from data
-    inputed_value = 0
-    if (value == "zero"):
+    data_drop = data[np.logical_not(index)].astype(float)  # drop nan from data
+    if not data_drop.size:
+        inputed_value = 0
+    elif (value == "zero"):
         inputed_value = 0
     elif (value == "mean"):
         inputed_value = np.mean(data_drop)
@@ -40,7 +44,7 @@ def myImputer(data, value="zero", verbose=False):
     elif (value == "min"):
         inputed_value = np.min(data_drop)
     elif (value == "new"):
-        inputed_value = 0   # 0 is the value that never happens in our categorical map
+        inputed_value = 0  # 0 is the value that never happens in our categorical map
     elif (value == "popular"):
         inputed_value = popular_value(data_drop)
     # special type of imputed, just return after imputation
@@ -71,10 +75,10 @@ def imputeData(data, missing_col_id, imputation_strategies, verbose=False):
     for i in range(len(imputation_strategies)):
         strategy = imputation_strategies[i]
         col_id = missing_col_id[i]
-        data_clean[:,col_id] = myImputer(data[:,col_id], strategy)
-
+        data_clean[:, col_id] = myImputer(data[:, col_id], strategy)
 
     return data_clean
+
 
 def bayeImpute(data, target_col, verbose=False):
     '''
@@ -91,9 +95,9 @@ def bayeImpute(data, target_col, verbose=False):
     original_data = np.copy(data)
 
     target = data[:, target_col]
-    data = np.delete(data, obj=target_col, axis=1)  #remove the missing-value column
+    data = np.delete(data, obj=target_col, axis=1)  # remove the missing-value column
     mv_mask = pd.isnull(target)
-    if verbose: print("number of imputated cells: {}".format(sum(pd.isnull(original_data[:,target_col]))))
+    if verbose: print("number of imputated cells: {}".format(sum(pd.isnull(original_data[:, target_col]))))
 
     x_test = data[mv_mask]
     x_train = data[~mv_mask]
@@ -113,12 +117,12 @@ def bayeImpute(data, target_col, verbose=False):
     # special case in predict:
     # if the model goes wrong: predicts nan value. using mean method instead
     if (pd.isnull(result).sum() > 0):
-        if verbose: print ("Warning: model gets nan value, using mean instead")
+        if verbose: print("Warning: model gets nan value, using mean instead")
         model = "mean"
-        original_data[:,target_col] = myImputer(original_data[:,target_col], model)
+        original_data[:, target_col] = myImputer(original_data[:, target_col], model)
         return original_data, model
 
-    original_data[mv_mask, target_col] = result #put the imputation result back to original data, following the index
+    original_data[mv_mask, target_col] = result  # put the imputation result back to original data, following the index
 
     # print("coefficient: {}".format(model.coef_))
     return original_data, model
@@ -133,28 +137,29 @@ def transform(data, target_col, model, verbose=False):
     original_data = np.copy(data)
 
     target = data[:, target_col]
-    data = np.delete(data, obj=target_col, axis=1)  #remove the missing-value column
+    data = np.delete(data, obj=target_col, axis=1)  # remove the missing-value column
     mv_mask = pd.isnull(target)
-    if verbose: print("number of imputated cells: {}".format(sum(pd.isnull(original_data[:,target_col]))))
+    if verbose: print("number of imputated cells: {}".format(sum(pd.isnull(original_data[:, target_col]))))
 
     x_test = data[mv_mask]
     x_train = data[~mv_mask]
     y_train = target[~mv_mask]
 
-    if not model=='mean':
+    if not model == 'mean':
         result = model.predict(x_test)
 
     # special case in predict:
     # if the model goes wrong: predicts nan value. using mean method instead
-    if (model=='mean' or pd.isnull(result).sum() > 0):
-        if verbose: print ("Warning: model gets nan value, using mean instead")
+    if (model == 'mean' or pd.isnull(result).sum() > 0):
+        if verbose: print("Warning: model gets nan value, using mean instead")
         model = "mean"
-        original_data[:,target_col] = myImputer(original_data[:,target_col], model)
+        original_data[:, target_col] = myImputer(original_data[:, target_col], model)
         return original_data
-    original_data[mv_mask, target_col] = result #put the imputation result back to original data, following the index
+    original_data[mv_mask, target_col] = result  # put the imputation result back to original data, following the index
 
     # print("coefficient: {}".format(model.coef_))
     return original_data
+
 
 def df2np(data, missing_col_id=[], verbose=False):
     """
@@ -166,14 +171,20 @@ def df2np(data, missing_col_id=[], verbose=False):
     # 1. get the id for missing value column
     missing_col_name = []
     for col_name in data:
-        num = sum(pd.isnull(data[col_name]))
+        num = 0
+        for i in data[col_name].index:
+            this_dtype = data.dtypes[col_name]
+            if HelperFunction.custom_is_null(data[col_name][i], this_dtype):
+                num += 1
+
         if (num > 0):
             missing_col_id.append(counter)
             missing_col_name.append(col_name)
         counter += 1
 
-    if verbose: print("missing column name: {}".format(missing_col_name))
+    if verbose:
+        print("missing column name: {}".format(missing_col_name))
 
-    data = data.values  #convert to np array
+    data = data.values  # convert to np array
 
     return data

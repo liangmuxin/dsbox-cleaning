@@ -5,6 +5,7 @@ import typing
 import pandas as pd #  type: ignore
 import numpy as np
 
+from dsbox.datapreprocessing.cleaner.dependencies.helper_funcs import HelperFunction
 from d3m.primitive_interfaces.unsupervised_learning import UnsupervisedLearnerPrimitiveBase
 
 from d3m.primitive_interfaces.base import CallResult
@@ -112,7 +113,8 @@ class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Mea
         nan_sum = 0
         for col_name in inputs:
             for i in inputs[col_name].index:
-                if inputs[col_name][i] == "" or pd.isnull(inputs[col_name][i]):
+                this_dtype = inputs.dtypes[col_name]
+                if HelperFunction.custom_is_null(inputs[col_name][i], this_dtype):
                     nan_sum += 1
         if nan_sum == 0:    # no missing value exists
             if self._verbose:
@@ -121,8 +123,6 @@ class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Mea
 
         self._train_x = inputs
         self._is_fitted = False
-
-
 
     def fit(self, *, timeout: float = None, iterations: int = None) -> CallResult[None]:
         """
@@ -204,7 +204,8 @@ class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Mea
             # therefore, only use the mean_values to impute, should get a clean dataset
             for col_name in data:
                 for i in data[col_name].index:
-                    if data[col_name][i] == "" or pd.isnull(data[col_name][i]):
+                    this_dtype = data.dtypes[col_name]
+                    if HelperFunction.custom_is_null(data[col_name][i], this_dtype):
                         data.loc[i, col_name] = self.mean_values[col_name]
             data_clean = data
 
@@ -251,7 +252,7 @@ class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Mea
             lambda col: pd.to_numeric(col, errors='coerce')).mean(axis=0).to_dict()
 
         for name in self.mean_values.keys():
-            if pd.isnull(self.mean_values[name]):
+            if HelperFunction.custom_is_null(self.mean_values[name]):
                 self.mean_values[name] = 0.0
 
         # Mode for categorical columns
@@ -264,7 +265,7 @@ class MeanImputation(UnsupervisedLearnerPrimitiveBase[Input, Output, Params, Mea
 
         mode_values = self._train_x.iloc[:, self._categoric_columns].mode(axis=0).iloc[0].to_dict()
         for name in mode_values.keys():
-            if pd.isnull(mode_values[name]):
+            if HelperFunction.custom_is_null(mode_values[name]):
                 # mode is nan
                 rest = self._train_x[name].dropna()
                 if rest.shape[0] == 0:
