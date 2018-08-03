@@ -26,10 +26,13 @@ from common_primitives.dataset_to_dataframe import DatasetToDataFramePrimitive, 
 from common_primitives.extract_columns_semantic_types import ExtractColumnsBySemanticTypesPrimitive
 
 h_DE = hyper_DE.defaults()
-h_DD =hyper_DD.defaults()
+h_DD = hyper_DD.defaults()
 
-h_attr = {'semantic_types': ('https://metadata.datadrivendiscovery.org/types/Attribute',),'use_columns': (), 'exclude_columns': ()}
-h_target = {'semantic_types': ('https://metadata.datadrivendiscovery.org/types/Target','https://metadata.datadrivendiscovery.org/types/SuggestedTarget',), 'use_columns': (), 'exclude_columns': ()}
+h_attr = {'semantic_types': ('https://metadata.datadrivendiscovery.org/types/Attribute',), 'use_columns': (),
+          'exclude_columns': ()}
+h_target = {'semantic_types': ('https://metadata.datadrivendiscovery.org/types/Target',
+                               'https://metadata.datadrivendiscovery.org/types/SuggestedTarget',), 'use_columns': (),
+            'exclude_columns': ()}
 
 primitive_0 = Denormalize(hyperparams=h_DE)
 primitive_1 = DatasetToDataFramePrimitive(hyperparams=h_DD)
@@ -48,7 +51,6 @@ result1 = primitive_1.produce(inputs=result0.value)
 
 X = primitive_3.produce(inputs=result1.value).value
 Y = primitive_4.produce(inputs=result1.value).value
-
 
 hp = GreedyHyperparameter.sample()
 
@@ -183,7 +185,6 @@ class TestMean(unittest.TestCase):
                     else:
                         self.assertEqual(str(data[col_name][i]) == str(result[col_name][i]), True,
                                          msg="not equals in column: {}".format(col_name))
-
 
 
 if __name__ == '__main__':
